@@ -1,85 +1,167 @@
+// Componente de inicio de sesión y registro dinámico adaptado con campos separados para nombres y apellidos
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import '../styles/Login.css';
 
 const Login = () => {
-    // Estado para capturar lo que el usuario escribe
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [mostrarOlvidado, setMostrarOlvidado] = useState(false);
+    const [rolSeleccionado, setRolSeleccionado] = useState('');
+    const [mostrarRegistroRol, setMostrarRegistroRol] = useState(false);
+    const [nombresReg, setNombresReg] = useState('');
+    const [apellidosReg, setApellidosReg] = useState('');
+    const [cedulaReg, setCedulaReg] = useState('');
+    const [emailReg, setEmailReg] = useState('');
+    const [passReg, setPassReg] = useState('');
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            // Aquí conectaremos con tu backend mañana
-            console.log("Intentando iniciar sesión con:", { email, password });
             const respuesta = await axios.post('http://localhost:5000/api/auth/login', { email, password });
-
-            // Guardar Token
             localStorage.setItem('token', respuesta.data.token); 
-
-            console.log("Login exitoso, token guardado");
             navigate('/dashboard');
-            
         } catch (error) {
-            console.error("Error al loguear:", error.response.data.msg);
             setMostrarOlvidado(true);
-            alert(error.response.data.msg);
+            alert(error.response?.data?.msg || "Error en el servidor");
+        }
+    };
+
+    const handleRolChange = (e) => {
+        const rol = e.target.value;
+        setRolSeleccionado(rol);
+        setMostrarRegistroRol(rol !== '');
+    };
+
+    const handleRegistroRolSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await axios.post('http://localhost:5000/api/auth/registro', {
+                nombres: nombresReg,
+                apellidos: apellidosReg,
+                cedula: cedulaReg,
+                email: emailReg,
+                password: passReg,
+                rol: rolSeleccionado
+            });
+            alert('Usuario registrado exitosamente');
+            setMostrarRegistroRol(false);
+            setRolSeleccionado('');
+            setNombresReg('');
+            setApellidosReg('');
+            setCedulaReg('');
+            setEmailReg('');
+            setPassReg('');
+        } catch (error) {
+            alert(error.response?.data?.msg || "Error al registrar usuario");
         }
     };
 
     return (
-        <div style={{ maxWidth: '400px', margin: '100px auto', padding: '20px', border: '1px solid #ddd', borderRadius: '10px' }}>
+        <div className="login-container">
             <h2>Iniciar Sesión</h2>
             <form onSubmit={handleSubmit}>
-                <div style={{ marginBottom: '10px' }}>
+                <div className="form-group">
                     <label>Correo Electrónico:</label>
                     <input 
                         type="email" 
                         value={email} 
                         onChange={(e) => setEmail(e.target.value)} 
-                        style={{ width: '100%', padding: '8px' }}
                         required 
                     />
                 </div>
-                <div style={{ marginBottom: '10px' }}>
+                <div className="form-group">
                     <label>Contraseña:</label>
                     <input 
                         type="password" 
                         value={password} 
                         onChange={(e) => setPassword(e.target.value)} 
-                        style={{ width: '100%', padding: '8px' }}
                         required 
                     />
                 </div>
-                {/* OPCIÓN OLVIDASTE TU CONTRASEÑA (Solo aparece tras un error) */}
+
                 {mostrarOlvidado && (
-                    <div style={{ marginBottom: '15px', textAlign: 'right' }}>
-                        <span 
-                            onClick={() => navigate('/recuperar-password')} 
-                            style={{ color: '#2c3e50', fontSize: '13px', cursor: 'pointer', textDecoration: 'underline' }}
-                        >
+                    <div className="forgot-password">
+                        <span onClick={() => navigate('/recuperar-password')}>
                             ¿Olvidaste tu contraseña?
                         </span>
                     </div>
                 )}
 
-                <button 
-                    type="button" 
-                    onClick={() => navigate('/registro')}
-                    style={{ width: '100%', padding: '10px', backgroundColor: '#f8f9fa', color: '#333', border: '1px solid #ccc', borderRadius: '5px', marginBottom: '10px', cursor: 'pointer' }}
-                >
-                    Registrarse
-                </button>
-
-                <button type="submit" style={{ width: '100%', padding: '10px', backgroundColor: '#2c3e50', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
+                <button type="submit" className="btn-entrar">
                     Entrar
                 </button>
             </form>
+
+            <div className="role-section">
+                <label htmlFor="selectRol">Por favor seleccione un Perfil:</label>
+                <select id="selectRol" value={rolSeleccionado} onChange={handleRolChange}>
+                    <option value="" disabled>Seleccione...</option>
+                    <option value="Secretario/a">Secretario/a</option>
+                    <option value="Coordinador de catequesis">Coordinador de catequesis</option>
+                    <option value="Catequista">Catequista</option>
+                </select>
+            </div>
+
+            {mostrarRegistroRol && (
+                <div className="register-rol-box">
+                    <h3>Registro para: {rolSeleccionado}</h3>
+                    <form onSubmit={handleRegistroRolSubmit}>
+                        <div className="form-group">
+                            <label>Nombres:</label>
+                            <input 
+                                type="text" 
+                                value={nombresReg} 
+                                onChange={(e) => setNombresReg(e.target.value)} 
+                                required 
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>Apellidos:</label>
+                            <input 
+                                type="text" 
+                                value={apellidosReg} 
+                                onChange={(e) => setApellidosReg(e.target.value)} 
+                                required 
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>Cédula:</label>
+                            <input 
+                                type="text" 
+                                value={cedulaReg} 
+                                onChange={(e) => setCedulaReg(e.target.value)} 
+                                required 
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>Correo:</label>
+                            <input 
+                                type="email" 
+                                value={emailReg} 
+                                onChange={(e) => setEmailReg(e.target.value)} 
+                                required 
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>Contraseña:</label>
+                            <input 
+                                type="password" 
+                                value={passReg} 
+                                onChange={(e) => setPassReg(e.target.value)} 
+                                required 
+                            />
+                        </div>
+                        <button type="submit" className="btn-registrar">
+                            Completar Registro
+                        </button>
+                    </form>
+                </div>
+            )}
         </div>
     );
 };
 
 export default Login;
-                

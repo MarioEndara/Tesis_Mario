@@ -16,9 +16,9 @@ const transporter = nodemailer.createTransport({
 
 // Verificación para estar 100% seguros en la terminal
 transporter.verify().then(() => {
-    console.log('✅ Servidor de correos conectado y saltando certificados');
+    console.log('Servidor de correos conectado y saltando certificados');
 }).catch((err) => {
-    console.log('❌ Error persistente en mailer:', err);
+    console.log('Error persistente en mailer:', err);
 });
 
 module.exports = transporter;
