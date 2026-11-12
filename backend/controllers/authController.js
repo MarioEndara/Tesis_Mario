@@ -84,11 +84,25 @@ exports.autenticarUsuario = async (req, res) => {
         const esCorrecto = await bcrypt.compare(password, usuario.password);
         if (!esCorrecto) return res.status(400).json({ msg: "Contraseña incorrecta" });
 
-        const payload = { usuario: { id: usuario.id } };
+        // Definimos el rol (si es del modelo Persona sin rol explícito, le asignamos 'Participante')
+        const rolUsuario = usuario.rol || 'Participante';
+
+        // Incluimos el id y el rol en el payload del token
+        const payload = { 
+            usuario: { 
+                id: usuario.id,
+                rol: rolUsuario
+            } 
+        };
 
         jwt.sign(payload, process.env.SECRETA, { expiresIn: '8h' }, (error, token) => {
             if (error) throw error;
-            res.json({ token });
+            // Enviamos el token, el rol y el nombre para que el Frontend los use directamente
+            res.json({ 
+                token, 
+                rol: rolUsuario,
+                nombres: usuario.nombres 
+            });
         });
     } catch (error) {
         console.error(error);

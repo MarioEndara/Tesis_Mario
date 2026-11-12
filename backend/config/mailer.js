@@ -3,12 +3,12 @@ const nodemailer = require('nodemailer');
 const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 465,
-    secure: true, // Usa SSL
+    secure: true,
     auth: {
         user: 'mendara2009@gmail.com',
         pass: 'gsoa uved zxsy xsof'    
     },
-    // ESTA PARTE ES LA QUE SOLUCIONA TU ERROR:
+    
     tls: {
         rejectUnauthorized: false
     }

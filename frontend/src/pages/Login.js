@@ -21,7 +21,9 @@ const Login = () => {
         e.preventDefault();
         try {
             const respuesta = await axios.post('http://localhost:5000/api/auth/login', { email, password });
-            localStorage.setItem('token', respuesta.data.token); 
+            localStorage.setItem('token', respuesta.data.token);
+            localStorage.setItem('rol', respuesta.data.rol);
+            localStorage.setItem('nombres', respuesta.data.nombres);
             navigate('/dashboard');
         } catch (error) {
             setMostrarOlvidado(true);

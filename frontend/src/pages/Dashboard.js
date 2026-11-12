@@ -1,18 +1,22 @@
+// Componente principal del panel de control general
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
     const navigate = useNavigate();
+    const rolUsuario = localStorage.getItem('rol') || 'Usuario';
 
     const cerrarSesion = () => {
         localStorage.removeItem('token');
+        localStorage.removeItem('rol');
+        localStorage.removeItem('nombres');
         navigate('/');
     };
 
     const styles = {
         container: { backgroundColor: '#f4f4f4', minHeight: '100vh', fontFamily: 'Arial, sans-serif' },
         headerBanner: {
-            backgroundColor: '#641212', // TU COLOR CORPORATIVO
+            backgroundColor: '#641212',
             color: 'white',
             margin: '20px',
             borderRadius: '25px',
@@ -32,7 +36,7 @@ const Dashboard = () => {
         },
         grid: {
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', // Se ajustan solas
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
             gap: '20px',
             padding: '40px 20px',
             maxWidth: '1200px',
@@ -72,23 +76,21 @@ const Dashboard = () => {
 
     return (
         <div style={styles.container}>
-            {/* NIVEL 1: EL BANNER CURVO (IGUAL A TU FIGMA) */}
             <div style={styles.headerBanner}>
                 <div style={styles.bannerText}>
                     <h1 style={{ fontSize: '3rem', margin: 0, fontWeight: 'bold' }}>BIENVENIDOS</h1>
                     <p style={{ fontSize: '1.2rem', opacity: 0.9 }}>Parroquia San Ignacio de Loyola</p>
                     <div style={{ display: 'flex', gap: '15px', marginTop: '25px' }}>
-                        <button style={{ padding: '12px 25px', borderRadius: '30px', border: 'none', backgroundColor: 'white', color: '#641212', fontWeight: 'bold', cursor: 'pointer' }}>ADMINISTRADOR</button>
-                        {/* Botón de cerrar sesión con estilo de tu diseño */}
+                        <span style={{ padding: '12px 25px', borderRadius: '30px', backgroundColor: 'white', color: '#641212', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center' }}>
+                            {rolUsuario.toUpperCase()}
+                        </span>
                         <button onClick={cerrarSesion} style={{ padding: '12px 25px', borderRadius: '30px', border: '1px solid white', backgroundColor: 'transparent', color: 'white', fontWeight: 'bold', cursor: 'pointer' }}>CERRAR SESIÓN</button>
                     </div>
                 </div>
                 <div style={styles.bannerImage}></div>
             </div>
 
-            {/* GRILLA DE 6 TARJETAS */}
             <div style={styles.grid}>
-                {/* BAUTISMOS */}
                 <div style={styles.card} onClick={() => navigate('/registrar-bautismo')}>
                     <div style={styles.iconCircle}>🌊</div>
                     <div><h3 style={{ margin: 0, color: '#333' }}>Registrar Bautismo</h3><small style={{ color: '#888' }}>Nuevo ingreso</small></div>
@@ -99,7 +101,6 @@ const Dashboard = () => {
                     <div><h3 style={{ margin: 0, color: '#333' }}>Consultar Bautismo</h3><small style={{ color: '#888' }}>Búsqueda y edición</small></div>
                 </div>
 
-                {/* CATEQUESIS */}
                 <div style={styles.card} onClick={() => navigate('/inscribir-catequesis')}>
                     <div style={styles.iconCircle}>📖</div>
                     <div><h3 style={{ margin: 0, color: '#333' }}>Inscribir Catequesis</h3><small style={{ color: '#888' }}>Registro de alumnos</small></div>
@@ -110,43 +111,37 @@ const Dashboard = () => {
                     <div><h3 style={{ margin: 0, color: '#333' }}>Lista de Alumnos</h3><small style={{ color: '#888' }}>Control de tutorías</small></div>
                 </div>
 
-                {/* MATRIMONIOS */}
                 <div style={styles.card} onClick={() => navigate('/registrar-matrimonio')}>
                     <div style={styles.iconCircle}>💍</div>
                     <div><h3 style={{ margin: 0, color: '#333' }}>Registrar Matrimonio</h3><small style={{ color: '#888' }}>Módulo de actas</small></div>
                 </div>
 
-                {/* NUEVO: CONSULTAR MATRIMONIOS */}
                 <div style={styles.card} onClick={() => navigate('/consultar-matrimonio')}>
                     <div style={styles.iconCircle}>📂</div>
                     <div><h3 style={{ margin: 0, color: '#333' }}>Consultar Matrimonio</h3><small style={{ color: '#888' }}>Ver actas registradas</small></div>
                 </div>
             </div>
-            {/* SECCIÓN DESCARGA APP - IGUAL A TU IMAGEN */}
-<div style={styles.downloadSection}>
-    
-    {/* Contenedor Izquierdo: Logo */}
-    <div style={{ textAlign: 'center' }}>
-        <img src="/assets/logo.png" alt="Logo Parroquia" style={{ width: '140px' }} />
-        <h4 style={{ margin: '10px 0 0 0', color: '#641212', fontWeight: 'bold' }}>SAN IGNACIO DE LOYOLA</h4>
-    </div>
-    
-    {/* Contenedor Derecho: Texto y Botones CENTRADOS entre ellos */}
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '600px' }}>
-        <h2 style={{ color: '#1a1919', marginBottom: '10px', fontSize: '2.2rem', textAlign: 'center', fontWeight: 'bold' }}>
-            DESCARGA LA APLICACIÓN
-        </h2>
-        <p style={{ color: '#666', fontSize: '1.1rem', textAlign: 'center', marginBottom: '20px' }}>
-            Gestiona tus trámites y certificados de forma rápida y segura desde tu dispositivo móvil.
-        </p>
-        
-        {/* Botones centrados respecto al texto de arriba */}
-        <div style={{ display: 'flex', gap: '15px', justifyContent: 'center' }}>
-            <img src="/assets/appstore.png" alt="App Store" style={styles.btnStore} />
-            <img src="/assets/googleplay.png" alt="Google Play" style={styles.btnStore} />
-        </div>
-    </div>
-</div>                       
+
+            <div style={styles.downloadSection}>
+                <div style={{ textAlign: 'center' }}>
+                    <img src="/assets/logo.png" alt="Logo Parroquia" style={{ width: '140px' }} />
+                    <h4 style={{ margin: '10px 0 0 0', color: '#641212', fontWeight: 'bold' }}>SAN IGNACIO DE LOYOLA</h4>
+                </div>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '600px' }}>
+                    <h2 style={{ color: '#1a1919', marginBottom: '10px', fontSize: '2.2rem', textAlign: 'center', fontWeight: 'bold' }}>
+                        DESCARGA LA APLICACIÓN
+                    </h2>
+                    <p style={{ color: '#666', fontSize: '1.1rem', textAlign: 'center', marginBottom: '20px' }}>
+                        Gestiona tus trámites y certificados de forma rápida y segura desde tu dispositivo móvil.
+                    </p>
+                    
+                    <div style={{ display: 'flex', gap: '15px', justifyContent: 'center' }}>
+                        <img src="/assets/appstore.png" alt="App Store" style={styles.btnStore} />
+                        <img src="/assets/googleplay.png" alt="Google Play" style={styles.btnStore} />
+                    </div>
+                </div>
+            </div>                
         </div>
     );
 }

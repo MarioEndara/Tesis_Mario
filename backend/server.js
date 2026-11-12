@@ -4,13 +4,11 @@ const conectarDB = require('./config/db');
 const cors = require('cors');
 require('dotenv').config();
 const crearAdminPorDefecto = require('./config/initAdmin');
-const crearOperadoresPorDefecto = require('./config/initOperador');
 
 const app = express();
 
 conectarDB().then(async () => {
     await crearAdminPorDefecto();
-    await crearOperadoresPorDefecto();
 });
 
 app.use(cors());
