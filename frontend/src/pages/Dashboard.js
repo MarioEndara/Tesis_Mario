@@ -1,10 +1,13 @@
-// Componente principal del panel de control general
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
     const navigate = useNavigate();
     const rolUsuario = localStorage.getItem('rol') || 'Usuario';
+    const rolNormalizado = rolUsuario.toLowerCase();
+
+    const esUsuarioGeneral = rolNormalizado === 'usuario';
+    const esCatequista = rolNormalizado === 'catequista';
 
     const cerrarSesion = () => {
         localStorage.removeItem('token');
@@ -91,35 +94,73 @@ const Dashboard = () => {
             </div>
 
             <div style={styles.grid}>
-                <div style={styles.card} onClick={() => navigate('/registrar-bautismo')}>
-                    <div style={styles.iconCircle}>🌊</div>
-                    <div><h3 style={{ margin: 0, color: '#333' }}>Registrar Bautismo</h3><small style={{ color: '#888' }}>Nuevo ingreso</small></div>
-                </div>
+                {esUsuarioGeneral ? (
+                    <>
+                        <div style={styles.card} onClick={() => navigate('/mi-perfil')}>
+                            <div style={styles.iconCircle}>👤</div>
+                            <div><h3 style={{ margin: 0, color: '#333' }}>Mis Datos Personales</h3><small style={{ color: '#888' }}>Consulta y actualización</small></div>
+                        </div>
 
-                <div style={styles.card} onClick={() => navigate('/consultar-bautismo')}>
-                    <div style={styles.iconCircle}>🔍</div>
-                    <div><h3 style={{ margin: 0, color: '#333' }}>Consultar Bautismo</h3><small style={{ color: '#888' }}>Búsqueda y edición</small></div>
-                </div>
+                        <div style={styles.card} onClick={() => navigate('/estado-cursos')}>
+                            <div style={styles.iconCircle}>📊</div>
+                            <div><h3 style={{ margin: 0, color: '#333' }}>Estado de Aprobación</h3><small style={{ color: '#888' }}>Cursos e inscripciones</small></div>
+                        </div>
 
-                <div style={styles.card} onClick={() => navigate('/inscribir-catequesis')}>
-                    <div style={styles.iconCircle}>📖</div>
-                    <div><h3 style={{ margin: 0, color: '#333' }}>Inscribir Catequesis</h3><small style={{ color: '#888' }}>Registro de alumnos</small></div>
-                </div>
+                        <div style={styles.card} onClick={() => navigate('/requisitos-pendientes')}>
+                            <div style={styles.iconCircle}>📝</div>
+                            <div><h3 style={{ margin: 0, color: '#333' }}>Requisitos Pendientes</h3><small style={{ color: '#888' }}>Documentación y trámites</small></div>
+                        </div>
+                    </>
+                ) : esCatequista ? (
+                    <>
+                        <div style={styles.card} onClick={() => navigate('/mis-cursos')}>
+                            <div style={styles.iconCircle}>🏫</div>
+                            <div><h3 style={{ margin: 0, color: '#333' }}>Mis Cursos y Aulas</h3><small style={{ color: '#888' }}>Paralelos asignados</small></div>
+                        </div>
 
-                <div style={styles.card} onClick={() => navigate('/consultar-catequesis')}>
-                    <div style={styles.iconCircle}>📋</div>
-                    <div><h3 style={{ margin: 0, color: '#333' }}>Lista de Alumnos</h3><small style={{ color: '#888' }}>Control de tutorías</small></div>
-                </div>
+                        <div style={styles.card} onClick={() => navigate('/consultar-catequesis')}>
+                            <div style={styles.iconCircle}>📋</div>
+                            <div><h3 style={{ margin: 0, color: '#333' }}>Mis Catequizados</h3><small style={{ color: '#888' }}>Consulta de alumnos asignados</small></div>
+                        </div>
 
-                <div style={styles.card} onClick={() => navigate('/registrar-matrimonio')}>
-                    <div style={styles.iconCircle}>💍</div>
-                    <div><h3 style={{ margin: 0, color: '#333' }}>Registrar Matrimonio</h3><small style={{ color: '#888' }}>Módulo de actas</small></div>
-                </div>
+                        <div style={styles.card} onClick={() => navigate('/registrar-asistencia')}>
+                            <div style={styles.iconCircle}>✅</div>
+                            <div><h3 style={{ margin: 0, color: '#333' }}>Registro de Asistencias</h3><small style={{ color: '#888' }}>Control y actualización</small></div>
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <div style={styles.card} onClick={() => navigate('/registrar-bautismo')}>
+                            <div style={styles.iconCircle}>🌊</div>
+                            <div><h3 style={{ margin: 0, color: '#333' }}>Registrar Bautismo</h3><small style={{ color: '#888' }}>Nuevo ingreso</small></div>
+                        </div>
 
-                <div style={styles.card} onClick={() => navigate('/consultar-matrimonio')}>
-                    <div style={styles.iconCircle}>📂</div>
-                    <div><h3 style={{ margin: 0, color: '#333' }}>Consultar Matrimonio</h3><small style={{ color: '#888' }}>Ver actas registradas</small></div>
-                </div>
+                        <div style={styles.card} onClick={() => navigate('/consultar-bautismo')}>
+                            <div style={styles.iconCircle}>🔍</div>
+                            <div><h3 style={{ margin: 0, color: '#333' }}>Consultar Bautismo</h3><small style={{ color: '#888' }}>Búsqueda y edición</small></div>
+                        </div>
+
+                        <div style={styles.card} onClick={() => navigate('/inscribir-catequesis')}>
+                            <div style={styles.iconCircle}>📖</div>
+                            <div><h3 style={{ margin: 0, color: '#333' }}>Inscribir Catequesis</h3><small style={{ color: '#888' }}>Registro de alumnos</small></div>
+                        </div>
+
+                        <div style={styles.card} onClick={() => navigate('/consultar-catequesis')}>
+                            <div style={styles.iconCircle}>📋</div>
+                            <div><h3 style={{ margin: 0, color: '#333' }}>Lista de Alumnos</h3><small style={{ color: '#888' }}>Control de tutorías</small></div>
+                        </div>
+
+                        <div style={styles.card} onClick={() => navigate('/registrar-matrimonio')}>
+                            <div style={styles.iconCircle}>💍</div>
+                            <div><h3 style={{ margin: 0, color: '#333' }}>Registrar Matrimonio</h3><small style={{ color: '#888' }}>Módulo de actas</small></div>
+                        </div>
+
+                        <div style={styles.card} onClick={() => navigate('/consultar-matrimonio')}>
+                            <div style={styles.iconCircle}>📂</div>
+                            <div><h3 style={{ margin: 0, color: '#333' }}>Consultar Matrimonio</h3><small style={{ color: '#888' }}>Ver actas registradas</small></div>
+                        </div>
+                    </>
+                )}
             </div>
 
             <div style={styles.downloadSection}>

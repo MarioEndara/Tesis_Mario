@@ -14,7 +14,7 @@ conectarDB().then(async () => {
 app.use(cors());
 app.use(express.json());
 
-app.use('/api/personas', require('./routes/personaRoutes'));
+app.use('/api/usuarios', require('./routes/usuarioRoutes'));
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/bautismo', require('./routes/bautismoRoutes'));
 app.use('/api/catequesis', require('./routes/catequesisRoutes'));

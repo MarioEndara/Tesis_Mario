@@ -1,4 +1,6 @@
+// Controlador de catequesis con filtro de cursos por catequista y gestión de asistencias
 const Catequesis = require('../models/Catequesis');
+const jwt = require('jsonwebtoken');
 
 exports.crearInscripcion = async (req, res) => {
     try {
@@ -18,15 +20,33 @@ exports.crearInscripcion = async (req, res) => {
 
 exports.obtenerInscritos = async (req, res) => {
     try {
-        const inscritos = await Catequesis.find().sort({ fechaInscripcion: -1 });
+        let filtro = {};
+        const token = req.header('x-auth-token') || req.header('Authorization')?.replace('Bearer ', '');
+
+        if (token) {
+            try {
+                const cifrado = jwt.verify(token, process.env.SECRETA);
+                if (cifrado.usuario && cifrado.usuario.rol && cifrado.usuario.rol.toLowerCase() === 'catequista') {
+                    filtro.catequista = cifrado.usuario.id;
+                }
+            } catch (err) {
+                return res.status(401).json({ msg: 'Token no válido' });
+            }
+        }
+
+        const inscritos = await Catequesis.find(filtro)
+            .populate('catequista', 'nombres apellidos email')
+            .sort({ fechaInscripcion: -1 });
         res.json(inscritos);
     } catch (error) {
+        console.log(error);
         res.status(500).send('Error al obtener datos');
     }
 };
+
 exports.obtenerInscritoPorId = async (req, res) => {
     try {
-        const inscrito = await Catequesis.findById(req.params.id);
+        const inscrito = await Catequesis.findById(req.params.id).populate('catequista', 'nombres apellidos email');
         if (!inscrito) {
             return res.status(404).json({ msg: "Inscripción no encontrada" });
         }
@@ -37,7 +57,6 @@ exports.obtenerInscritoPorId = async (req, res) => {
     }
 };
 
-// Guardar los cambios de una edición (PUT)
 exports.actualizarInscripcion = async (req, res) => {
     try {
         const actualizado = await Catequesis.findByIdAndUpdate(
@@ -51,7 +70,38 @@ exports.actualizarInscripcion = async (req, res) => {
         res.status(500).send('Error al actualizar la inscripción');
     }
 };
-// Eliminar una inscripción de catequesis
+
+exports.registrarAsistencia = async (req, res) => {
+    try {
+        const { fecha, estado } = req.body;
+        const inscripcion = await Catequesis.findById(req.params.id);
+
+        if (!inscripcion) {
+            return res.status(404).json({ msg: "Inscripción no encontrada" });
+        }
+
+        const fechaConsulta = fecha ? new Date(fecha).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+        const indiceExistente = inscripcion.asistencias.findIndex(
+            a => new Date(a.fecha).toISOString().split('T')[0] === fechaConsulta
+        );
+
+        if (indiceExistente !== -1) {
+            inscripcion.asistencias[indiceExistente].estado = estado;
+        } else {
+            inscripcion.asistencias.push({
+                fecha: fecha ? new Date(fecha) : new Date(),
+                estado: estado || 'Presente'
+            });
+        }
+
+        await inscripcion.save();
+        res.json({ msg: "Asistencia registrada/actualizada correctamente", asistencias: inscripcion.asistencias });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Error al registrar la asistencia');
+    }
+};
+
 exports.eliminarInscripcion = async (req, res) => {
     try {
         const inscripcion = await Catequesis.findById(req.params.id);

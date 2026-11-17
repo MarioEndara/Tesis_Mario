@@ -1,4 +1,3 @@
-// Componente de inicio de sesión y registro dinámico adaptado con campos separados para nombres y apellidos
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -13,6 +12,8 @@ const Login = () => {
     const [nombresReg, setNombresReg] = useState('');
     const [apellidosReg, setApellidosReg] = useState('');
     const [cedulaReg, setCedulaReg] = useState('');
+    const [direccionReg, setDireccionReg] = useState('');
+    const [fechaNacimientoReg, setFechaNacimientoReg] = useState('');
     const [emailReg, setEmailReg] = useState('');
     const [passReg, setPassReg] = useState('');
     const navigate = useNavigate();
@@ -40,20 +41,37 @@ const Login = () => {
     const handleRegistroRolSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://localhost:5000/api/auth/registro', {
-                nombres: nombresReg,
-                apellidos: apellidosReg,
-                cedula: cedulaReg,
-                email: emailReg,
-                password: passReg,
-                rol: rolSeleccionado
-            });
-            alert('Usuario registrado exitosamente');
+            if (rolSeleccionado === 'Usuario') {
+                const res = await axios.post('http://localhost:5000/api/usuarios', {
+                    nombres: nombresReg,
+                    apellidos: apellidosReg,
+                    cedula: cedulaReg,
+                    direccion: direccionReg,
+                    fechaNacimiento: fechaNacimientoReg,
+                    email: emailReg,
+                    password: passReg,
+                    rol: 'Usuario'
+                });
+                alert(res.data.msg || 'Usuario registrado exitosamente. Ya puede iniciar sesión.');
+            } else {
+                const res = await axios.post('http://localhost:5000/api/auth/registro', {
+                    nombres: nombresReg,
+                    apellidos: apellidosReg,
+                    cedula: cedulaReg,
+                    email: emailReg,
+                    password: passReg,
+                    rol: rolSeleccionado
+                });
+                alert(res.data.msg || 'Solicitud enviada. Espere la aprobación del administrador.');
+            }
+
             setMostrarRegistroRol(false);
             setRolSeleccionado('');
             setNombresReg('');
             setApellidosReg('');
             setCedulaReg('');
+            setDireccionReg('');
+            setFechaNacimientoReg('');
             setEmailReg('');
             setPassReg('');
         } catch (error) {
@@ -101,6 +119,7 @@ const Login = () => {
                 <label htmlFor="selectRol">Por favor seleccione un Perfil:</label>
                 <select id="selectRol" value={rolSeleccionado} onChange={handleRolChange}>
                     <option value="" disabled>Seleccione...</option>
+                    <option value="Usuario">Usuario</option>
                     <option value="Secretario/a">Secretario/a</option>
                     <option value="Coordinador de catequesis">Coordinador de catequesis</option>
                     <option value="Catequista">Catequista</option>
@@ -138,6 +157,30 @@ const Login = () => {
                                 required 
                             />
                         </div>
+
+                        {rolSeleccionado === 'Usuario' && (
+                            <>
+                                <div className="form-group">
+                                    <label>Dirección:</label>
+                                    <input 
+                                        type="text" 
+                                        value={direccionReg} 
+                                        onChange={(e) => setDireccionReg(e.target.value)} 
+                                        required 
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Fecha de Nacimiento:</label>
+                                    <input 
+                                        type="date" 
+                                        value={fechaNacimientoReg} 
+                                        onChange={(e) => setFechaNacimientoReg(e.target.value)} 
+                                        required 
+                                    />
+                                </div>
+                            </>
+                        )}
+
                         <div className="form-group">
                             <label>Correo:</label>
                             <input 

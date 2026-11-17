@@ -1,48 +1,45 @@
-const Persona = require('../models/Persona');
+const Usuario = require('../models/Usuario');
+const Operador = require('../models/Operador');
 const bcrypt = require('bcryptjs');
 
 exports.registrarPersona = async (req, res) => {
     try {
         const { cedula, email, password, historial } = req.body;
 
-        // 1. VALIDACIÓN DE CÉDULA Y EMAIL ÚNICOS
-        // Buscamos si ya existe alguien con esa cédula O ese correo
-        const existePersona = await Persona.findOne({ 
+        const existeUsuario = await Usuario.findOne({ 
+            $or: [{ cedula }, { email }] 
+        });
+        const existeOperador = await Operador.findOne({ 
             $or: [{ cedula }, { email }] 
         });
         
-        if (existePersona) {
-            const mensaje = existePersona.cedula === cedula 
-                ? "Ya existe un feligrés con esta cédula." 
+        if (existeUsuario || existeOperador) {
+            const coincidencias = existeUsuario || existeOperador;
+            const mensaje = coincidencias.cedula === cedula 
+                ? "Ya existe un usuario registrado con esta cédula." 
                 : "Este correo electrónico ya está en uso.";
             return res.status(400).json({ msg: mensaje });
         }
 
-        // 2. TU LÓGICA DE HISTORIAL (Se mantiene intacta)
         if (historial && historial.length > 1) {
             return res.status(400).json({ msg: "Alerta: No se puede ingresar dos niveles diferentes." });
         }
 
-        // 3. CREAR EL REGISTRO
-        const nuevaPersona = new Persona(req.body);
+        const nuevoUsuario = new Usuario(req.body);
 
-        // 4. ENCRIPTAR LA CONTRASEÑA (Obligatorio para que luego puedan hacer Login)
         const salt = await bcrypt.genSalt(10);
-        nuevaPersona.password = await bcrypt.hash(password, salt);
+        nuevoUsuario.password = await bcrypt.hash(password, salt);
 
-        // 5. ASIGNAR ROL POR DEFECTO (Si no viene en el body)
-        if (!nuevaPersona.rol) {
-            nuevaPersona.rol = 'feligres';
-        }
+        nuevoUsuario.rol = 'Usuario';
 
-        await nuevaPersona.save();
+        await nuevoUsuario.save();
         
         res.json({ 
             msg: "Registro exitoso. Ahora puede acceder con su correo.", 
             persona: {
-                id: nuevaPersona._id,
-                nombres: nuevaPersona.nombres,
-                rol: nuevaPersona.rol
+                id: nuevoUsuario._id,
+                nombres: nuevoUsuario.nombres,
+                rol: nuevoUsuario.rol
             } 
         });
 
@@ -51,12 +48,11 @@ exports.registrarPersona = async (req, res) => {
         res.status(500).send('Error al guardar el registro en la base de datos');
     }
 };
-// Busqueda por nombres desde TunderClient
+
 exports.consultarPersona = async (req, res) => {
     try {
         const { nombre } = req.query;
-        // Buscamos coincidencias parciales en nombres o apellidos
-        const resultados = await Persona.find({
+        const resultados = await Usuario.find({
             $or: [
                 { nombres: { $regex: nombre, $options: 'i' } },
                 { apellidos: { $regex: nombre, $options: 'i' } }
@@ -67,32 +63,31 @@ exports.consultarPersona = async (req, res) => {
         res.status(500).json({ msg: "Error en la consulta" });
     }
 };
-// Función para editar/actualizar datos
+
 exports.editarPersona = async (req, res) => {
     try {
-        // Buscamos por ID y actualizamos con los nuevos datos del body
-        const personaActualizada = await Persona.findByIdAndUpdate(
+        const usuarioActualizado = await Usuario.findByIdAndUpdate(
             req.params.id, 
             req.body, 
-            { new: true } // Esto devuelve el documento ya modificado
+            { new: true }
         );
 
-        if (!personaActualizada) {
-            return res.status(404).json({ msg: "Persona no encontrada" });
+        if (!usuarioActualizado) {
+            return res.status(404).json({ msg: "Usuario no encontrado" });
         }
 
-        res.json({ msg: "Datos actualizados correctamente", persona: personaActualizada });
+        res.json({ msg: "Datos actualizados correctamente", persona: usuarioActualizado });
     } catch (error) {
         console.error(error);
         res.status(500).send('Error al actualizar los datos');
     }
 };
-// Función para eliminar un registro
+
 exports.eliminarPersona = async (req, res) => {
     try {
-        const personaEliminada = await Persona.findByIdAndDelete(req.params.id);
+        const usuarioEliminado = await Usuario.findByIdAndDelete(req.params.id);
 
-        if (!personaEliminada) {
+        if (!usuarioEliminado) {
             return res.status(404).json({ msg: "No se encontró el registro para eliminar" });
         }
 
